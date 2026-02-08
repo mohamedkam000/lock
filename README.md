@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="applock.jpg" alt="App Lock" width="600" />
+  <img src="applock.png" alt="App Lock" width="600" />
 </div>
 
 <h1 align="center">App Lock</h1>
@@ -16,7 +16,6 @@ App Lock is a well-designed Android app locker designed to protect your privacy.
 
 - Material You design
 - Biometric and PIN authentication
-- Anti-uninstall
 - Unlock timeout
 - Doesn't need internet connection.
 - No ads.

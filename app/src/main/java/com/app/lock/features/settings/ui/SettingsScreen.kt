@@ -165,7 +165,6 @@ fun SettingsScreen(
                 showAccessibilityDialog = false
                 openAccessibilitySettings(context)
 
-                // Check if device admin is still needed after accessibility is granted
                 val dpm =
                     context.getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
                 val component = ComponentName(context, DeviceAdmin::class.java)
@@ -326,7 +325,7 @@ fun SettingsScreen(
                             context.startActivity(
                                 Intent(
                                     Intent.ACTION_VIEW,
-                                    "https://github.com/mohamedkam000/applock".toUri()
+                                    "https://github.com/mohamedkam000/lock".toUri()
                                 )
                             )
                         })
@@ -450,7 +449,6 @@ fun UnlockTimeDurationDialog(
     val durations = listOf(0, 1, 5, 15, 30, 60)
     var selectedDuration by remember { mutableIntStateOf(currentDuration) }
 
-    // If the current duration is not in our list, default to the closest value
     if (!durations.contains(selectedDuration)) {
         selectedDuration = durations.minByOrNull { abs(it - currentDuration) } ?: 0
     }

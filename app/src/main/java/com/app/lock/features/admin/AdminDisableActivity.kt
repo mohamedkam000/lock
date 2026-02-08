@@ -43,7 +43,6 @@ class AdminDisableActivity : ComponentActivity() {
 
         appLockRepository = appLockRepository()
 
-        // Set up back press callback to prevent admin disabling
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 val deviceAdmin = DeviceAdmin()

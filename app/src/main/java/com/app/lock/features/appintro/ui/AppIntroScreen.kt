@@ -376,7 +376,6 @@ fun AppIntroScreen(navController: NavController) {
                 AppUsageMethod.USAGE_STATS -> context.hasUsagePermission()
             }
 
-            // Only require all permissions if accessibility is selected
             val allPermissionsGranted = if (selectedMethod == AppUsageMethod.ACCESSIBILITY) {
                 overlayPermissionGranted && notificationPermissionGranted && methodPermissionGranted
             } else {

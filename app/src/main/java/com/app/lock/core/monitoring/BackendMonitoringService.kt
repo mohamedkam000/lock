@@ -15,13 +15,13 @@ class BackendMonitoringService : Service() {
 
     private val handler = Handler(Looper.getMainLooper())
     private var monitoringRunnable: Runnable? = null
-    private val monitoringInterval = 5000L // Check every 5 seconds
+    private val monitoringInterval = 5000L
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startMonitoring()
-        return START_STICKY // Restart if killed
+        return START_STICKY
     }
 
     override fun onDestroy() {
@@ -40,12 +40,10 @@ class BackendMonitoringService : Service() {
                     Log.e("BackendMonitor", "Error during backend check", e)
                 }
 
-                // Schedule next check
                 handler.postDelayed(this, monitoringInterval)
             }
         }
 
-        // Start monitoring
         handler.post(monitoringRunnable!!)
     }
 
@@ -59,10 +57,8 @@ class BackendMonitoringService : Service() {
         val appLockRepository = applicationContext.appLockRepository()
         val currentActive = appLockRepository.getActiveBackend()
 
-        // Validate and switch if needed
         val newActiveBackend = appLockRepository.validateAndSwitchBackend(applicationContext)
 
-        // If backend changed, we need to start/stop appropriate services
         if (newActiveBackend != currentActive) {
             Log.i("BackendMonitor", "Backend switched from $currentActive to $newActiveBackend")
             handleBackendSwitch(currentActive!!, newActiveBackend)
@@ -75,10 +71,8 @@ class BackendMonitoringService : Service() {
     ) {
         Log.d("BackendMonitor", "Switching from $oldBackend to $newBackend")
 
-        // Stop all services first to ensure only one runs at a time
         stopAllServices()
 
-        // Start new backend service
         startBackendService(newBackend)
     }
 
@@ -96,7 +90,6 @@ class BackendMonitoringService : Service() {
             }
 
             BackendImplementation.ACCESSIBILITY -> {
-                // Accessibility service is managed by the system, can't stop it programmatically
                 Log.d("BackendMonitor", "Cannot stop accessibility service programmatically")
             }
         }
@@ -110,7 +103,6 @@ class BackendMonitoringService : Service() {
             }
 
             BackendImplementation.ACCESSIBILITY -> {
-                // Accessibility service is managed by the system
                 Log.d("BackendMonitor", "Accessibility service managed by system")
             }
         }

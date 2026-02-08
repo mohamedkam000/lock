@@ -62,7 +62,7 @@ fun AdminPasswordVerificationDialog(
                     value = password,
                     onValueChange = {
                         password = it
-                        error = "" // Clear error when user types
+                        error = ""
                     },
                     label = { Text("PIN") },
                     visualTransformation = PasswordVisualTransformation(),

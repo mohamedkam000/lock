@@ -278,7 +278,6 @@ fun SetPasswordScreen(
                                 isVerifyOldPasswordMode = true
                             }
                         }
-                        // Reset states
                         passwordState = ""
                         confirmPasswordState = ""
                         showMismatchError = false
@@ -329,7 +328,7 @@ fun SetPasswordScreen(
                                     if (passwordState.length == maxLength) {
                                         if (appLockRepository!!.validatePassword(passwordState)) {
                                             isVerifyOldPasswordMode = false
-                                            passwordState = "" // Clear for setting new PIN
+                                            passwordState = ""
                                             showInvalidOldPasswordError = false
                                         } else {
                                             showInvalidOldPasswordError = true
@@ -349,7 +348,7 @@ fun SetPasswordScreen(
                                     }
                                 }
 
-                                else -> { // Confirmation mode
+                                else -> {
                                     if (confirmPasswordState.length == maxLength) {
                                         if (passwordState == confirmPasswordState) {
                                             appLockRepository?.setPassword(passwordState)
@@ -359,7 +358,6 @@ fun SetPasswordScreen(
                                                 Toast.LENGTH_SHORT
                                             ).show()
 
-                                            // Navigate to Main screen after setting password
                                             navController.navigate(Screen.Main.route) {
                                                 popUpTo(Screen.SetPassword.route) {
                                                     inclusive = true

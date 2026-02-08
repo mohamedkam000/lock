@@ -23,7 +23,6 @@ class AppLockRepository(context: Context) {
 
     private var activeBackend: BackendImplementation? = null
 
-    // Locked Apps
     fun getLockedApps(): Set<String> {
         return appLockPrefs.getStringSet(KEY_LOCKED_APPS, emptySet()) ?: emptySet()
     }
@@ -40,7 +39,6 @@ class AppLockRepository(context: Context) {
         appLockPrefs.edit { putStringSet(KEY_LOCKED_APPS, currentApps) }
     }
 
-    // Password
     fun getPassword(): String? {
         return appLockPrefs.getString(KEY_PASSWORD, null)
     }
@@ -49,13 +47,11 @@ class AppLockRepository(context: Context) {
         appLockPrefs.edit { putString(KEY_PASSWORD, password) }
     }
 
-    // Password validation
     fun validatePassword(inputPassword: String): Boolean {
         val storedPassword = getPassword()
         return storedPassword != null && inputPassword == storedPassword
     }
 
-    // Unlock time duration
     fun setUnlockTimeDuration(minutes: Int) {
         settingsPrefs.edit { putInt(KEY_UNLOCK_TIME_DURATION, minutes) }
     }
@@ -64,7 +60,6 @@ class AppLockRepository(context: Context) {
         return settingsPrefs.getInt(KEY_UNLOCK_TIME_DURATION, 0)
     }
 
-    // Settings
     fun setBiometricAuthEnabled(enabled: Boolean) {
         settingsPrefs.edit { putBoolean(KEY_BIOMETRIC_AUTH_ENABLED, enabled) }
     }
@@ -138,7 +133,6 @@ class AppLockRepository(context: Context) {
         }
     }
 
-    // Active backend tracking (runtime switching)
     fun setActiveBackend(backend: BackendImplementation) {
         activeBackend = backend
     }
@@ -147,7 +141,6 @@ class AppLockRepository(context: Context) {
         return activeBackend
     }
 
-    // Backend status checking
     fun isBackendAvailable(backend: BackendImplementation, context: Context): Boolean {
         return when (backend) {
             BackendImplementation.ACCESSIBILITY -> context.isAccessibilityServiceEnabled()
@@ -162,32 +155,26 @@ class AppLockRepository(context: Context) {
 
         if (isBackendAvailable(currentActive!!, context)) {
             Log.d("AppLockRepository", "Current active backend is available: $currentActive")
-            return currentActive // Still working, keep using it
+            return currentActive
         }
 
         Log.w("AppLockRepository", "Current active backend is not available: $currentActive")
 
-        // Current active backend failed, find next best option
         val newBackend = when {
-            // Try primary first (if different from current)
             currentActive != primary && isBackendAvailable(primary, context) -> primary
-            // Try fallback if primary also fails
+
             primary != fallback && isBackendAvailable(fallback, context) -> fallback
-            // If both fail, return primary to trigger permission request
             else -> primary
         }
 
-        // Switch to new backend if it's different
         if (newBackend != currentActive) {
             setActiveBackend(newBackend)
-            // Start monitoring service to handle future backend switches
             startBackendMonitoring(context)
         }
 
         return newBackend
     }
 
-    // Start the backend monitoring service
     private fun startBackendMonitoring(context: Context) {
         try {
             val intent = Intent(
@@ -196,7 +183,6 @@ class AppLockRepository(context: Context) {
             )
             context.startService(intent)
         } catch (e: Exception) {
-            // Service class not found or other error, ignore
         }
     }
 
@@ -217,31 +203,29 @@ class AppLockRepository(context: Context) {
         private const val KEY_ACTIVE_BACKEND = "active_backend"
 
         fun shouldStartService(rep: AppLockRepository, serviceClass: Class<*>): Boolean {
-            // check if some other service is already running, BUT this one should take precedence, and take over
-            // this function is called inside the service asked to start
             rep.getActiveBackend().let { activeBackend ->
                 Log.d(
                     "AppLockRepository",
                     "activeBackend: ${activeBackend?.name}, requested service: ${serviceClass.simpleName}, chosen backend: ${rep.getBackendImplementation().name}, fallback: ${rep.getFallbackBackend().name}"
                 )
                 if (activeBackend == rep.getBackendImplementation()) {
-                    return false // current backend takes precedence
+                    return false
                 }
                 val backendClass = when (serviceClass) {
                     AppLockAccessibilityService::class.java -> BackendImplementation.ACCESSIBILITY
                     ExperimentalAppLockService::class.java -> BackendImplementation.USAGE_STATS
-                    else -> return false // Unknown service class, do not start
+                    else -> return false
                 }
                 if (backendClass == rep.getBackendImplementation()) {
                     Log.d(
                         "AppLockRepository",
                         "Service ${serviceClass.simpleName} matches requested backend"
                     )
-                    return true // This service requesting to start matches the active backend
+                    return true
                 }
                 rep.getFallbackBackend().let { fallbackBackend ->
                     if (activeBackend == rep.getBackendImplementation()) {
-                        return false // Fallback backend takes precedence
+                        return false
                     }
                     return backendClass == fallbackBackend
                 }

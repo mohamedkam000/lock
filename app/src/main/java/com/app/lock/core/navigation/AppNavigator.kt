@@ -98,7 +98,6 @@ fun AppNavHost(navController: NavHostController, startDestination: String) {
                     biometricPrompt.authenticate(promptInfo)
                 },
                 onAuthSuccess = {
-                    // if there is back stack, pop back, otherwise navigate to Main
                     if (navController.previousBackStackEntry != null) {
                         navController.popBackStack()
                     } else {

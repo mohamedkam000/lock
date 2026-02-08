@@ -105,7 +105,6 @@ class PasswordOverlayActivity : FragmentActivity() {
         appLockAccessibilityService = AppLockAccessibilityService.getInstance()
 
         onBackPressedDispatcher.addCallback(this) {
-            // Prevent back navigation to maintain security
         }
 
         setupWindow()
@@ -227,8 +226,7 @@ class PasswordOverlayActivity : FragmentActivity() {
     override fun onResume() {
         super.onResume()
         movedToBackground = false
-        AppLockManager.isLockScreenShown.set(true) // Set to true when activity is visible
-        // Apply user preferences asynchronously to avoid blocking
+        AppLockManager.isLockScreenShown.set(true)
         Thread {
             applyUserPreferences()
         }.start()
@@ -262,7 +260,7 @@ class PasswordOverlayActivity : FragmentActivity() {
     override fun onPause() {
         super.onPause()
         movedToBackground = true
-        AppLockManager.isLockScreenShown.set(false) // Set to false when activity is no longer visible
+        AppLockManager.isLockScreenShown.set(false)
         if (!isFinishing && !isDestroyed) {
             Log.d(TAG, "Activity moved to background: $lockedPackageNameFromIntent")
             AppLockManager.reportBiometricAuthFinished()
@@ -272,7 +270,7 @@ class PasswordOverlayActivity : FragmentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        AppLockManager.isLockScreenShown.set(false) // Failsafe: Ensure it's false on destroy
+        AppLockManager.isLockScreenShown.set(false)
         AppLockManager.reportBiometricAuthFinished()
         Log.d(TAG, "PasswordOverlayActivity onDestroy for $lockedPackageNameFromIntent")
     }
@@ -390,7 +388,7 @@ fun PasswordIndicators(
             val scale by animateFloatAsState(
                 targetValue = if (filled) 1.2f else if (isNext) 1.1f else 1.0f,
                 animationSpec = tween(
-                    durationMillis = 100, // Further reduced duration
+                    durationMillis = 100,
                     easing = FastOutSlowInEasing
                 ),
                 label = "indicatorScale"

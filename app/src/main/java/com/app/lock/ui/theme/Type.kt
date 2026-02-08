@@ -9,7 +9,6 @@ import androidx.compose.ui.unit.sp
 
 val default = Typography()
 
-// Enhanced Typography definitions matching the appintro module
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 val Typography = Typography(
     bodyLarge = TextStyle(

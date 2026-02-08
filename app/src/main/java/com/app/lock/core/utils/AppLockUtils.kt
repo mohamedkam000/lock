@@ -61,7 +61,6 @@ fun launchBatterySettings(context: Context) {
                 Toast.LENGTH_LONG
             ).show()
         } else {
-            // Very rare case where even the standard settings screen is missing.
             Toast.makeText(
                 context,
                 "Couldn't open battery settings",

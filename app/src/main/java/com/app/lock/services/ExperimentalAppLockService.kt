@@ -39,10 +39,9 @@ class ExperimentalAppLockService : Service() {
         AppLockManager.resetRestartAttempts("ExperimentalAppLockService")
         appLockRepository.setActiveBackend(BackendImplementation.USAGE_STATS)
 
-        // Stop other services to ensure only one runs at a time
         stopOtherServices()
 
-        AppLockManager.isLockScreenShown.set(false) // Set to false on start to ensure correct initial state
+        AppLockManager.isLockScreenShown.set(false)
 
         timer = Timer()
         timer?.schedule(object : TimerTask() {
@@ -58,7 +57,7 @@ class ExperimentalAppLockService : Service() {
                     return
                 }
                 if (foregroundApp.packageName == packageName || foregroundApp.packageName in getKeyboardPackageNames()) {
-                    return // Skip if the current app is this service or a keyboard app
+                    return
                 }
                 checkAndLockApp(foregroundApp.packageName, System.currentTimeMillis())
             }
@@ -82,7 +81,7 @@ class ExperimentalAppLockService : Service() {
         if (shouldStartService(appLockRepository, this::class.java)) {
             AppLockManager.startFallbackServices(this, ExperimentalAppLockService::class.java)
         }
-        AppLockManager.isLockScreenShown.set(false) // Set to false on destroy
+        AppLockManager.isLockScreenShown.set(false)
         super.onDestroy()
     }
 
@@ -135,11 +134,11 @@ class ExperimentalAppLockService : Service() {
         }
 
         try {
-            AppLockManager.isLockScreenShown.set(true) // Set to true before attempting to start
+            AppLockManager.isLockScreenShown.set(true)
             startActivity(intent)
         } catch (e: Exception) {
             Log.e(TAG, "Error starting PasswordOverlayActivity for package: $packageName", e)
-            AppLockManager.isLockScreenShown.set(false) // Reset on failure
+            AppLockManager.isLockScreenShown.set(false)
         }
     }
 

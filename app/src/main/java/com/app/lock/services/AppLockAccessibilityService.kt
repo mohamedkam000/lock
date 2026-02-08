@@ -23,13 +23,10 @@ import com.app.lock.services.AppLockManager.isServiceRunning
 class AppLockAccessibilityService : AccessibilityService() {
     private lateinit var appLockRepository: AppLockRepository
 
-    // The last app that was on screen
     private var lastForegroundPackage = ""
 
-    // Keeps a record of last 3 events stored to prevents false lock screen due to recents bug
     private val lastEvents = mutableListOf<Pair<AccessibilityEvent, Long>>()
 
-    // Package name of the system app that provides the recent apps functionality
     private var recentsPackage = ""
 
     enum class BiometricState {
@@ -78,13 +75,11 @@ class AppLockAccessibilityService : AccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
         if (!::appLockRepository.isInitialized) return
 
-        // Always handle device admin deactivation regardless of backend
         if (appLockRepository.isAntiUninstallEnabled() && event.packageName == DEVICE_ADMIN_SETTINGS_PACKAGE) {
             Log.d(TAG, "In settings, in activity: ${event.className}")
             checkForDeviceAdminDeactivation(event)
         }
 
-        // Check if accessibility should handle app locking
         val currentBackend = appLockRepository.getBackendImplementation()
         val shouldHandleAppLocking = when (currentBackend) {
             BackendImplementation.ACCESSIBILITY -> {
@@ -119,7 +114,6 @@ class AppLockAccessibilityService : AccessibilityService() {
             checkForDeviceAdminDeactivation(event)
         }
 
-        // Dont continue if its system or our app or keyboard package
         if (packageName.startsWith(APP_PACKAGE_PREFIX) || packageName in getKeyboardPackageNames()) {
             return
         }
@@ -132,9 +126,6 @@ class AppLockAccessibilityService : AccessibilityService() {
 
         val lockedApps = appLockRepository.getLockedApps()
 
-        // Apply the rapid events filter to all apps to prevent accidental locks when opening recents
-        // This is a "hack" to prevent locking apps when user opens recents because a bug in Android causes
-        // the last foreground app to come to foreground momentarily, atleast according to accessibility events
         if (lastEvents.size >= 2) {
             val firstEvent = lastEvents.first()
             val lastEvent = lastEvents.last()
@@ -179,7 +170,6 @@ class AppLockAccessibilityService : AccessibilityService() {
         val rootNode = rootInActiveWindow ?: return
 
         try {
-            // works atleast on Stock Android/Motorola devices
             val isDeviceAdminPage =
                 (event.className in knownAdminConfigClasses) || (findNodeWithTextContaining(
                     rootNode,
@@ -199,7 +189,6 @@ class AppLockAccessibilityService : AccessibilityService() {
             val dpm = getSystemService(DEVICE_POLICY_SERVICE) as DevicePolicyManager
             val component = ComponentName(this, DeviceAdmin::class.java)
             if (dpm.isAdminActive(component)) {
-                // go to home screen with accessibility service
                 Log.d(TAG, "Device admin is active, navigating to home screen")
                 performGlobalAction(GLOBAL_ACTION_HOME)
 
@@ -256,7 +245,7 @@ class AppLockAccessibilityService : AccessibilityService() {
     }
 
     fun checkAndLockApp(packageName: String, currentTime: Long) {
-        if (AppLockManager.isLockScreenShown.get()) { // Check if lock screen is already shown
+        if (AppLockManager.isLockScreenShown.get()) {
             Log.d(TAG, "Password overlay already active, skipping app lock for $packageName")
             return
         }
@@ -280,7 +269,6 @@ class AppLockAccessibilityService : AccessibilityService() {
             return
         }
 
-        // Check if app is within unlock time period
         val unlockDuration = appLockRepository.getUnlockTimeDuration()
         val unlockTimestamp = AppLockManager.appUnlockTimes[packageName] ?: 0
 
@@ -312,11 +300,11 @@ class AppLockAccessibilityService : AccessibilityService() {
         }
 
         try {
-            AppLockManager.isLockScreenShown.set(true) // Set to true before attempting to start
+            AppLockManager.isLockScreenShown.set(true)
             startActivity(intent)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to start password overlay: ${e.message}", e)
-            AppLockManager.isLockScreenShown.set(false) // Reset on failure
+            AppLockManager.isLockScreenShown.set(false)
         }
     }
 
@@ -341,10 +329,8 @@ class AppLockAccessibilityService : AccessibilityService() {
     }
 
     private fun startServices() {
-        // Stop all services first to ensure only one runs at a time
         stopAllServices()
 
-        // Start only the primary backend service
         when (appLockRepository.getBackendImplementation()) {
             BackendImplementation.USAGE_STATS -> {
                 Log.d(TAG, "Starting Experimental service as primary backend")

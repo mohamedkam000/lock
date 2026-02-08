@@ -47,12 +47,10 @@ object AppLockManager {
     private val serviceRestartAttempts = ConcurrentHashMap<String, Int>()
     private val lastRestartTime = ConcurrentHashMap<String, Long>()
     private const val MAX_RESTART_ATTEMPTS = 3
-    private const val RESTART_COOLDOWN_MS = 30000L // 30 seconds
-    private const val SERVICE_RESTART_INTERVAL_MS = 5000L // 5 seconds between attempts
-
+    private const val RESTART_COOLDOWN_MS = 30000L
+    private const val SERVICE_RESTART_INTERVAL_MS = 5000L
 
     fun unlockApp(packageName: String) {
-        // get where this function is called from and log it
         Log.d(
             "AppLockManager",
             "Unlocking app: $packageName from ${Thread.currentThread().stackTrace[3].className}.${Thread.currentThread().stackTrace[3].methodName}"
@@ -153,7 +151,6 @@ object AppLockManager {
 
     private fun startServiceByBackend(context: Context, backend: BackendImplementation) {
         try {
-            // Stop all other services first to ensure only one runs at a time
             stopAllServices(context)
 
             when (backend) {
