@@ -1,9 +1,6 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
+    id("com.android.application")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
@@ -12,10 +9,18 @@ android {
 
     defaultConfig {
         applicationId = "com.app.lock"
-        minSdk = 26
+        minSdk = 31
         targetSdk = 36
         versionCode = 1
         versionName = "1"
+        ndk {
+            abiFilters += listOf("arm64-v8a")
+//            debugSymbolLevel  'none'
+        }
+
+        androidResources {
+            localeFilters += setOf("en")
+        }
     }
 
     signingConfigs {
@@ -36,17 +41,19 @@ android {
         }
     }
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    kotlin.compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_11)
-    }
-
     buildFeatures {
         compose = true
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_25
+        targetCompatibility = JavaVersion.VERSION_25
+    }
+
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
     }
 
     dependenciesInfo {
