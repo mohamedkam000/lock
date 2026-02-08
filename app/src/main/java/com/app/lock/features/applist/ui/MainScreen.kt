@@ -188,7 +188,7 @@ fun MainScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "محمد كمال الدين عثمان عبدالله",
+                        "محمد كمال الدين عثمان",
                         style = MaterialTheme.typography.titleLarge,
                     )
                 },

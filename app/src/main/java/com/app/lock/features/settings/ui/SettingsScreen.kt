@@ -5,18 +5,49 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-//import android.widget.Toast
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricManager
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Person
+//import androidx.compose.material.icons.filled.QueryStats
+//import androidx.compose.material.icons.filled.Vibration
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -32,21 +63,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.navigation.NavController
-import com.app.lock.core.broadcast.DeviceAdmin
+//import com.app.lock.core.broadcast.DeviceAdmin
 import com.app.lock.core.navigation.Screen
-import com.app.lock.core.utils.hasUsagePermission
-import com.app.lock.core.utils.isAccessibilityServiceEnabled
-import com.app.lock.core.utils.openAccessibilitySettings
+// import com.app.lock.core.utils.hasUsagePermission
+// import com.app.lock.core.utils.isAccessibilityServiceEnabled
+// import com.app.lock.core.utils.openAccessibilitySettings
 import com.app.lock.data.repository.AppLockRepository
-import com.app.lock.data.repository.BackendImplementation
-import com.app.lock.services.ExperimentalAppLockService
-import com.app.lock.ui.icons.Accessibility
-import com.app.lock.ui.icons.BrightnessHigh
+// import com.app.lock.data.repository.BackendImplementation
+//import com.app.lock.services.ExperimentalAppLockService
+//import com.app.lock.ui.icons.Accessibility
+//import com.app.lock.ui.icons.BrightnessHigh
 import com.app.lock.ui.icons.Fingerprint
 import com.app.lock.ui.icons.FingerprintOff
 import com.app.lock.ui.icons.Github
-import com.app.lock.ui.icons.Timer
-import kotlin.math.abs
+//import com.app.lock.ui.icons.Timer
+//import kotlin.math.abs
+
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -55,45 +87,15 @@ fun SettingsScreen(
 ) {
     val context = LocalContext.current
     val appLockRepository = remember { AppLockRepository(context) }
-    var showDialog by remember { mutableStateOf(false) }
-    var showUnlockTimeDialog by remember { mutableStateOf(false) }
-
-    var useMaxBrightness by remember {
-        mutableStateOf(appLockRepository.shouldUseMaxBrightness())
-    }
     var useBiometricAuth by remember {
         mutableStateOf(appLockRepository.isBiometricAuthEnabled())
     }
     var popBiometricAuth by remember {
         mutableStateOf(appLockRepository.shouldPromptForBiometricAuth())
     }
-    var unlockTimeDuration by remember {
-        mutableIntStateOf(appLockRepository.getUnlockTimeDuration())
-    }
-
-    var antiUninstallEnabled by remember {
-        mutableStateOf(appLockRepository.isAntiUninstallEnabled())
-    }
-    var disableHapticFeedback by remember {
-        mutableStateOf(appLockRepository.shouldDisableHaptics())
-    }
-    var showPermissionDialog by remember { mutableStateOf(false) }
-    var showDeviceAdminDialog by remember { mutableStateOf(false) }
-    var showAccessibilityDialog by remember { mutableStateOf(false) }
-
     val biometricManager = BiometricManager.from(context)
     val isBiometricAvailable = remember {
         biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_WEAK or BiometricManager.Authenticators.DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS
-    }
-
-    if (showPermissionDialog) {
-        PermissionRequiredDialog(
-            onDismiss = { showPermissionDialog = false },
-            onConfirm = {
-                showPermissionDialog = false
-                showDeviceAdminDialog = true
-            }
-        )
     }
 
     Scaffold(
@@ -289,3 +291,140 @@ fun ActionSettingItem(
         }
     }
 }
+
+// @Composable
+// fun UnlockTimeDurationDialog(
+//     currentDuration: Int,
+//     onDismiss: () -> Unit,
+//     onConfirm: (Int) -> Unit
+// ) {
+//     val durations = listOf(0, 1, 5, 15, 30, 60)
+//     var selectedDuration by remember { mutableIntStateOf(currentDuration) }
+// 
+//     if (!durations.contains(selectedDuration)) {
+//         selectedDuration = durations.minByOrNull { abs(it - currentDuration) } ?: 0
+//     }
+// 
+//     AlertDialog(
+//         onDismissRequest = onDismiss,
+//         title = { Text("App Unlock Duration") },
+//         text = {
+//             Column {
+//                 Text("Pick how long apps should remain unlocked:")
+// 
+//                 durations.forEach { duration ->
+//                     Row(
+//                         modifier = Modifier
+//                             .fillMaxWidth()
+//                             .clickable { selectedDuration = duration }
+//                             .padding(vertical = 12.dp),
+//                         verticalAlignment = Alignment.CenterVertically
+//                     ) {
+//                         RadioButton(
+//                             selected = selectedDuration == duration,
+//                             onClick = { selectedDuration = duration }
+//                         )
+//                         Text(
+//                             text = when (duration) {
+//                                 0 -> "Lock immediately"
+//                                 1 -> "1 minute"
+//                                 60 -> "1 hour"
+//                                 else -> "$duration minutes"
+//                             },
+//                             modifier = Modifier.padding(start = 8.dp)
+//                         )
+//                     }
+//                 }
+//             }
+//         },
+//         confirmButton = {
+//             TextButton(onClick = { onConfirm(selectedDuration) }) {
+//                 Text("Confirm")
+//             }
+//         },
+//         dismissButton = {
+//             TextButton(onClick = onDismiss) {
+//                 Text("Cancel")
+//             }
+//         }
+//     )
+// }
+// 
+// @Composable
+// fun PermissionRequiredDialog(
+//     onDismiss: () -> Unit,
+//     onConfirm: () -> Unit
+// ) {
+//     AlertDialog(
+//         onDismissRequest = onDismiss,
+//         title = { Text("Permissions Required") },
+//         text = {
+//             Text(
+//                 "To enable Anti Uninstall, App Lock needs Device Admin permission"
+//             )
+//         },
+//         confirmButton = {
+//             TextButton(onClick = onConfirm) {
+//                 Text("Grant Permission")
+//             }
+//         },
+//         dismissButton = {
+//             TextButton(onClick = onDismiss) {
+//                 Text("Cancel")
+//             }
+//         }
+//     )
+// }
+// 
+// @Composable
+// fun DeviceAdminDialog(
+//     onDismiss: () -> Unit,
+//     onConfirm: () -> Unit
+// ) {
+//     AlertDialog(
+//         onDismissRequest = onDismiss,
+//         title = { Text("Device Admin") },
+//         text = {
+//             Text(
+//                 "App Lock needs Device Admin permission to prevent uninstallation."
+//             )
+//         },
+//         confirmButton = {
+//             TextButton(onClick = onConfirm) {
+//                 Text("Enable")
+//             }
+//         },
+//         dismissButton = {
+//             TextButton(onClick = onDismiss) {
+//                 Text("Cancel")
+//             }
+//         }
+//     )
+// }
+
+// @Composable
+// fun AccessibilityDialog(
+//     onDismiss: () -> Unit,
+//     onConfirm: () -> Unit
+// ) {
+//     AlertDialog(
+//         onDismissRequest = onDismiss,
+//         title = { Text("Accessibility Service") },
+//         text = {
+//             Text(
+//                 "App Lock needs Accessibility Service permission to monitor app usage."
+//             )
+//         },
+//         confirmButton = {
+//             TextButton(onClick = onConfirm) {
+//                 Text("Enable")
+//             }
+//         },
+//         dismissButton = {
+//             TextButton(onClick = onDismiss) {
+//                 Text("Cancel")
+//             }
+//         }
+//     )
+// }
+// 
