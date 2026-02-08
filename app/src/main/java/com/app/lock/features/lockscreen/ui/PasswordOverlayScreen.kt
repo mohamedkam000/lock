@@ -296,7 +296,7 @@ fun PasswordOverlayScreen(
     ) {
         val passwordState = remember { mutableStateOf("") }
         var showError by remember { mutableStateOf(false) }
-        val maxLength = 4
+        val maxLength = 6
 
         Column(
             modifier = Modifier

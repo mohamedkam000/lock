@@ -188,7 +188,7 @@ fun MainScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "محمد كمال الدين عثمان",
+                        "App Lock",
                         style = MaterialTheme.typography.titleLarge,
                     )
                 },

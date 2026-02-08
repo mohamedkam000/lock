@@ -18,3 +18,4 @@ object AppIntroManager {
         sharedPrefs.edit { putBoolean(PREF_INTRO_SHOWN, true) }
     }
 }
+
